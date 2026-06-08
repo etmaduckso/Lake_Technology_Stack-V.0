@@ -1,89 +1,138 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ShieldCheck, Zap, Globe, ArrowRight } from "lucide-react";
+import { getServerDict } from "@/lib/i18n/server";
 
-export default function Home() {
+export default async function Home() {
+  const { dict } = await getServerDict();
+
   return (
-    <main className="flex min-h-screen flex-col items-center bg-slate-50 text-slate-900">
+    <main className="flex min-h-screen flex-col items-center bg-lake-paper text-lake-ink">
 
-      {/* HERO SECTION */}
-      <div className="w-full max-w-6xl px-4 py-20 text-center mt-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mb-6 tracking-wide border border-blue-200">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-          </span>
-          Protocolo LakeZero Ativo v1.0
+      {/* HERO */}
+      <section className="relative w-full overflow-hidden lake-wave-soft">
+        <div className="absolute inset-0 -z-10 opacity-[0.07]">
+          <Image
+            src="/brand/lake-wave-banner.png"
+            alt=""
+            fill
+            className="object-cover object-top"
+            priority
+          />
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-slate-900">
-          O Futuro dos Investimentos <br />
-          <span className="text-blue-600">É Real. É Tokenizado.</span>
-        </h1>
+        <div className="w-full max-w-6xl mx-auto px-4 py-24 md:py-32 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-sm text-lake-cyan-dark text-xs font-extrabold tracking-widest uppercase mb-8 border border-lake-cyan-light/40 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lake-cyan opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-lake-cyan"></span>
+            </span>
+            {dict.hero.protocolBadge}
+          </div>
 
-        <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-          A primeira plataforma institucional que une a segurança jurídica do mercado tradicional com a liquidez instantânea da blockchain.
-        </p>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-[1.02]">
+            {dict.hero.titleLine1} <span className="lake-gradient-text">{dict.hero.titleLine2}</span>
+            <br />
+            <span className="text-slate-700">{dict.hero.titleSubline}</span>
+          </h1>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/marketplace" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-lg transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 flex items-center gap-2">
-            Ver Ativos Disponíveis <ArrowRight className="w-5 h-5" />
-          </Link>
-          <Link href="/tokenize" className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-lg font-bold text-lg transition-all hover:border-slate-300 shadow-sm flex items-center gap-2">
-            Quero Tokenizar meu Ativo
-          </Link>
+          <p className="font-body text-xl md:text-2xl text-slate-600 max-w-2xl mx-auto mb-12 leading-relaxed italic">
+            {dict.hero.lead}
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/marketplace"
+              className="px-8 py-4 bg-lake-cyan hover:bg-lake-cyan-dark text-white rounded-2xl font-extrabold text-lg transition-all shadow-[0_8px_24px_rgba(41,171,226,0.35)] hover:shadow-[0_12px_32px_rgba(41,171,226,0.5)] hover:-translate-y-0.5 flex items-center gap-2"
+            >
+              {dict.hero.ctaPrimary} <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/tokenize"
+              className="px-8 py-4 bg-white hover:bg-lake-cyan-soft text-lake-ink border-2 border-slate-200 hover:border-lake-cyan-light rounded-2xl font-extrabold text-lg transition-all shadow-sm flex items-center gap-2"
+            >
+              {dict.hero.ctaSecondary}
+            </Link>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* CARDS DE VALOR - AGORA COM LINKS DIRETOS PARA A EXPLICAÇÃO */}
-      <div className="w-full bg-white border-t border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 py-16">
-          <div className="grid md:grid-cols-3 gap-8">
+      {/* CARDS DE VALOR */}
+      <section className="w-full bg-white border-t border-slate-200/70">
+        <div className="max-w-6xl mx-auto px-4 py-20">
+          <div className="grid md:grid-cols-3 gap-6">
 
-            {/* Card 1: Vai para a seção #security */}
-            <Link href="/learn#security" className="group p-8 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-blue-200 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden">
+            <Link
+              href="/learn#security"
+              className="group p-8 rounded-2xl border border-slate-100 bg-lake-paper hover:bg-white hover:border-lake-cyan-light hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden card-hover"
+            >
               <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ArrowRight className="w-5 h-5 text-blue-500 -translate-x-2 group-hover:translate-x-0 transition-transform" />
+                <ArrowRight className="w-5 h-5 text-lake-cyan -translate-x-2 group-hover:translate-x-0 transition-transform" />
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <ShieldCheck className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-lake-cyan-soft rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <ShieldCheck className="w-6 h-6 text-lake-cyan-dark" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 group-hover:text-blue-600 transition-colors">Segurança Jurídica</h3>
-              <p className="text-slate-600 leading-relaxed text-sm">
-                Entenda como nossos Smart Contracts são auditados e vinculados à legislação vigente (CVM).
+              <h3 className="text-xl font-black mb-3 text-lake-ink group-hover:text-lake-cyan-dark transition-colors">
+                {dict.values.legalTitle}
+              </h3>
+              <p className="font-body text-slate-600 leading-relaxed">
+                {dict.values.legalDesc}
               </p>
             </Link>
 
-            {/* Card 2: Vai para a seção #liquidity */}
-            <Link href="/learn#liquidity" className="group p-8 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-yellow-200 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden">
+            <Link
+              href="/learn#liquidity"
+              className="group p-8 rounded-2xl border border-slate-100 bg-lake-paper hover:bg-white hover:border-lake-coral hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden card-hover"
+            >
               <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ArrowRight className="w-5 h-5 text-yellow-500 -translate-x-2 group-hover:translate-x-0 transition-transform" />
+                <ArrowRight className="w-5 h-5 text-lake-coral -translate-x-2 group-hover:translate-x-0 transition-transform" />
               </div>
-              <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-yellow-100">
-                <Zap className="w-6 h-6 text-yellow-600" />
+              <div className="w-12 h-12 bg-lake-coral/15 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Zap className="w-6 h-6 text-lake-coral" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 group-hover:text-yellow-600 transition-colors">Liquidez LakeZero</h3>
-              <p className="text-slate-600 leading-relaxed text-sm">
-                Descubra a tecnologia de assinatura proprietária com latência zero e taxa de sustentabilidade.
+              <h3 className="text-xl font-black mb-3 text-lake-ink group-hover:text-lake-coral transition-colors">
+                {dict.values.liquidityTitle}
+              </h3>
+              <p className="font-body text-slate-600 leading-relaxed">
+                {dict.values.liquidityDesc}
               </p>
             </Link>
 
-            {/* Card 3: AGORA VAI PARA A EXPLICAÇÃO #global (ATENDENDO SUA SOLICITAÇÃO) */}
-            <Link href="/learn#global" className="group p-8 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-emerald-200 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden">
+            <Link
+              href="/learn#global"
+              className="group p-8 rounded-2xl border border-slate-100 bg-lake-paper hover:bg-white hover:border-lake-mint hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden card-hover"
+            >
               <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ArrowRight className="w-5 h-5 text-emerald-500 -translate-x-2 group-hover:translate-x-0 transition-transform" />
+                <ArrowRight className="w-5 h-5 text-green-600 -translate-x-2 group-hover:translate-x-0 transition-transform" />
               </div>
-              <div className="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-emerald-100">
-                <Globe className="w-6 h-6 text-emerald-600" />
+              <div className="w-12 h-12 bg-lake-mint/25 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Globe className="w-6 h-6 text-green-700" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 group-hover:text-emerald-600 transition-colors">Acesso Global</h3>
-              <p className="text-slate-600 leading-relaxed text-sm">
-                Comece a investir agora em grandes empreendimentos de qualquer lugar do mundo.
+              <h3 className="text-xl font-black mb-3 text-lake-ink group-hover:text-green-700 transition-colors">
+                {dict.values.globalTitle}
+              </h3>
+              <p className="font-body text-slate-600 leading-relaxed">
+                {dict.values.globalDesc}
               </p>
             </Link>
 
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* TAGLINE FAIXA */}
+      <section className="w-full bg-lake-ink text-white py-16">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <p className="font-body italic text-2xl md:text-3xl text-lake-cyan-light leading-relaxed">
+            &quot;{dict.tagline.lineOne}
+            <br />
+            <span className="text-white not-italic font-display font-black">
+              {dict.tagline.lineTwo}
+            </span>&quot;
+          </p>
+        </div>
+      </section>
+
     </main>
   );
 }

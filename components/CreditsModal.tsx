@@ -5,24 +5,26 @@ import { useCredits, CREDIT_PLANS, CreditPlan } from "@/context/credits-context"
 import { useWallet } from "@/context/wallet-context";
 import { X, Zap, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDict } from "@/lib/i18n/client";
 
 export function CreditsModal() {
-    const { 
-        isModalOpen, 
-        closeModal, 
-        buyCredits, 
+    const {
+        isModalOpen,
+        closeModal,
+        buyCredits,
         isLoading: isContextLoading,
         solPrice,
         isPriceLoading,
         oracleError
     } = useCredits();
     const { isConnected } = useWallet();
+    const dict = useDict();
+    const t = dict.credits;
     const [loadingPackageId, setLoadingPackageId] = useState<string | null>(null);
 
-    // Reactively log when the price changes
     useEffect(() => {
         if (solPrice) {
-            console.log(`[UI Update] Novo preço SOL: ${solPrice.toFixed(2)}, recalculando pacotes...`);
+            console.log(`[UI Update] New SOL price: ${solPrice.toFixed(2)}`);
         }
     }, [solPrice]);
 
@@ -30,7 +32,7 @@ export function CreditsModal() {
 
     const handlePurchase = async (originalPlan: CreditPlan) => {
         if (!isConnected) {
-            alert("Conecte sua carteira primeiro.");
+            alert(t.connectFirst);
             return;
         }
 
@@ -44,74 +46,61 @@ export function CreditsModal() {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
-            {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                 onClick={closeModal}
             />
 
-            {/* Modal */}
             <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 overflow-hidden animate-in zoom-in-95 fade-in duration-200">
-                {/* Close button */}
                 <button
                     onClick={closeModal}
                     className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 transition-colors z-10"
-                    aria-label="Fechar"
+                    aria-label={t.close}
                 >
                     <X className="w-5 h-5 text-slate-400" />
                 </button>
 
                 <div className="flex flex-col md:flex-row">
-                    {/* Left Panel - Branding (Dark) */}
                     <div className="bg-slate-900 text-white p-8 md:w-80 flex flex-col justify-between min-h-[480px]">
                         <div>
-                            {/* Icon */}
                             <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center mb-6">
                                 <Zap className="w-6 h-6 text-white" />
                             </div>
 
-                            {/* Title */}
                             <h2 className="text-2xl font-bold mb-4 leading-tight">
-                                Desbloqueie o Poder do LakeTokeniza
+                                {t.modalTitle}
                             </h2>
 
-                            {/* Description */}
                             <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-                                Adquira créditos para acessar simuladores avançados,
-                                relatórios de viabilidade e tokenização de ativos reais.
+                                {t.modalDesc}
                             </p>
 
-                            {/* Security Badge */}
                             <div className="flex items-center gap-2 text-sm text-slate-300">
                                 <Check className="w-4 h-4 text-green-400" />
-                                <span>Transação segura via Blockchain</span>
+                                <span>{t.secureTx}</span>
                             </div>
                         </div>
 
-                        {/* Footer text */}
                         <p className="text-xs text-slate-500 mt-8 leading-relaxed">
-                            Os valores de contribuição dos pacotes oferecidos são para manter a
-                            manutenção da plataforma e a segurança dos serviços oferecidos.
+                            {t.footerNote}
                         </p>
                     </div>
 
-                    {/* Right Panel - Plans (Light) */}
                     <div className="flex-1 p-8 bg-white">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
                                 <h3 className="text-xl font-semibold text-slate-900 mb-1">
-                                    Escolha seu pacote
+                                    {t.pickPackage}
                                 </h3>
                                 <p className="text-sm text-slate-500">
-                                    Selecione a quantidade de créditos que deseja adicionar.
+                                    {t.pickPackageDesc}
                                 </p>
                             </div>
 
-                            {/* Premium Live Oracle Price Badge */}
                             <div className={cn(
                                 "flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs font-medium self-start sm:self-center shadow-sm transition-colors",
-                                oracleError 
-                                    ? "bg-amber-50/50 border-amber-200/60 text-amber-700" 
+                                oracleError
+                                    ? "bg-amber-50/50 border-amber-200/60 text-amber-700"
                                     : "bg-slate-50 border-slate-100 text-slate-600"
                             )}>
                                 <span className="relative flex h-2 w-2">
@@ -127,23 +116,22 @@ export function CreditsModal() {
                                 {isPriceLoading ? (
                                     <span className="flex items-center gap-1.5">
                                         <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
-                                        Buscando oráculo...
+                                        {t.fetchingOracle}
                                     </span>
                                 ) : oracleError ? (
                                     <span>
-                                        Modo de Segurança: <strong className="text-amber-900 font-semibold">1 SOL = $150.00</strong>
+                                        {t.safeMode} <strong className="text-amber-900 font-semibold">1 SOL = $150.00</strong>
                                     </span>
                                 ) : solPrice ? (
                                     <span className="text-slate-700">
-                                        Cotação Jupiter/Pyth: <strong className="text-slate-900 font-semibold">1 SOL = ${solPrice.toFixed(2)}</strong>
+                                        {t.jupiterQuote} <strong className="text-slate-900 font-semibold">1 SOL = ${solPrice.toFixed(2)}</strong>
                                     </span>
                                 ) : (
-                                    <span className="text-amber-600 font-medium">Erro ao carregar oráculo</span>
+                                    <span className="text-amber-600 font-medium">{t.oracleError}</span>
                                 )}
                             </div>
                         </div>
 
-                        {/* Friendly Oracle Error Alert Notification Banner */}
                         {oracleError && (
                             <div className="mb-6 p-4 bg-amber-50 border border-amber-100/80 rounded-xl text-xs text-amber-800 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2 duration-300">
                                 <span className="relative flex h-2 w-2 mt-1">
@@ -151,13 +139,12 @@ export function CreditsModal() {
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                                 </span>
                                 <div className="flex-1">
-                                    <span className="font-semibold block mb-0.5 text-amber-900">Operação em Modo de Contingência</span>
-                                    <span>{oracleError} O processamento financeiro continuará ativo com a cotação padrão de segurança.</span>
+                                    <span className="font-semibold block mb-0.5 text-amber-900">{t.contingencyTitle}</span>
+                                    <span>{oracleError} {t.contingencyTail}</span>
                                 </div>
                             </div>
                         )}
 
-                        {/* Grid 2x2 */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {CREDIT_PLANS.map((plan) => (
                                 <PlanCard
@@ -171,9 +158,8 @@ export function CreditsModal() {
                             ))}
                         </div>
 
-                        {/* Footer */}
                         <p className="text-xs text-center text-slate-400 mt-6">
-                            Ao confirmar, uma transação será enviada para sua carteira Web3.
+                            {t.confirmFooter}
                         </p>
                     </div>
                 </div>
@@ -191,13 +177,13 @@ interface PlanCardProps {
 }
 
 function PlanCard({ plan, onSelect, isLoading, isAnyLoading, solPrice }: PlanCardProps) {
-    // Get dynamic SOL price from USD inside a useMemo to make sure it is completely reactive
+    const dict = useDict();
+    const t = dict.credits;
     const solAmount = useMemo(() => {
         const currentSolPrice = solPrice || 150;
         return (plan.priceUSD / currentSolPrice).toFixed(4);
     }, [plan.priceUSD, solPrice]);
 
-    // Visually flash/glow the SOL Badge when the oracle cotação changes
     const [isFlashing, setIsFlashing] = useState(false);
     useEffect(() => {
         if (solPrice) {
@@ -206,6 +192,21 @@ function PlanCard({ plan, onSelect, isLoading, isAnyLoading, solPrice }: PlanCar
             return () => clearTimeout(timer);
         }
     }, [solPrice]);
+
+    const planNameMap: Record<string, string> = {
+        trial: t.planTrial,
+        starter: t.planStarter,
+        pro: t.planPro,
+        expert: t.planExpert,
+    };
+    const planDescMap: Record<string, string> = {
+        trial: t.planTrialDesc,
+        starter: t.planStarterDesc,
+        pro: t.planProDesc,
+        expert: t.planExpertDesc,
+    };
+    const displayName = planNameMap[plan.id] ?? plan.name;
+    const displayDesc = planDescMap[plan.id] ?? "";
 
     return (
         <div
@@ -216,30 +217,24 @@ function PlanCard({ plan, onSelect, isLoading, isAnyLoading, solPrice }: PlanCar
                     : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-md"
             )}
         >
-            {/* Popular Badge - Positioned at top border */}
             {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="bg-slate-900 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                        Mais Popular
+                        {t.mostPopular}
                     </span>
                 </div>
             )}
 
-            {/* Header: Name + ETH Badge */}
             <div className="flex justify-between items-start mb-1">
                 <div>
-                    <h4 className="font-semibold text-slate-900 text-base">{plan.name}</h4>
+                    <h4 className="font-semibold text-slate-900 text-base">{displayName}</h4>
                     <p className="text-xs text-slate-500 mt-0.5">
-                        {plan.id === "trial" && "Teste rápido da plataforma."}
-                        {plan.id === "starter" && "Ideal para começar a explorar."}
-                        {plan.id === "pro" && "Melhor valor para investidores."}
-                        {plan.id === "expert" && "Para uso intensivo e institucional."}
+                        {displayDesc}
                     </p>
                 </div>
 
-                {/* SOL Badge - Black background with premium transition effect when updating */}
                 <div className="flex flex-col items-end">
-                    <span 
+                    <span
                         className={cn(
                             "text-[10px] font-medium text-white bg-slate-950 px-2 py-1 rounded transition-all duration-300 transform inline-block",
                             isFlashing && "bg-green-600 scale-110 shadow-[0_0_12px_rgba(22,163,74,0.6)] text-white"
@@ -253,13 +248,11 @@ function PlanCard({ plan, onSelect, isLoading, isAnyLoading, solPrice }: PlanCar
                 </div>
             </div>
 
-            {/* Credits - Large number */}
             <div className="flex items-baseline gap-1.5 my-4">
                 <span className="text-4xl font-bold text-slate-900">{plan.credits}</span>
-                <span className="text-sm text-slate-500">créditos</span>
+                <span className="text-sm text-slate-500">{t.credits}</span>
             </div>
 
-            {/* Buy Button */}
             <button
                 onClick={() => onSelect(plan)}
                 disabled={isAnyLoading}
@@ -274,10 +267,10 @@ function PlanCard({ plan, onSelect, isLoading, isAnyLoading, solPrice }: PlanCar
                 {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Processando...
+                        {t.processing}
                     </span>
                 ) : (
-                    "Comprar"
+                    t.buy
                 )}
             </button>
         </div>

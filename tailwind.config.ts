@@ -19,7 +19,26 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      fontFamily: {
+        display: ['var(--font-display)', 'Nunito', 'system-ui', 'sans-serif'],
+        body: ['var(--font-body)', 'EB Garamond', 'Georgia', 'serif'],
+        sans: ['var(--font-display)', 'Nunito', 'system-ui', 'sans-serif'],
+      },
       colors: {
+        lake: {
+          cyan: '#29ABE2',
+          'cyan-dark': '#1B95C8',
+          'cyan-light': '#7BC8EE',
+          'cyan-soft': '#E5F5FC',
+          wave: '#9BC9C0',
+          ink: '#0A0A0A',
+          paper: '#FAFAFA',
+          coral: '#EA6262',
+          turquoise: '#94D8D3',
+          lilac: '#BF80C3',
+          lime: '#E6F097',
+          mint: '#9BDFA0',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

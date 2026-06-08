@@ -1,8 +1,8 @@
-# Análise de Fluxo de Negócio – Lake Tokeniza
+# Análise de Fluxo de Negócio – Lake (Opening digital horizons)
 
 ## Visão Geral
 
-A **Lake Tokeniza** é uma plataforma inovadora focada na tokenização de Ativos do Mundo Real (RWA) atuando com tecnologia Web3 na blockchain Solana. A plataforma atua em dupla via:
+A **Lake** é uma plataforma inovadora focada na tokenização de Ativos do Mundo Real (RWA) atuando com tecnologia Web3 na blockchain Solana. A plataforma atua em dupla via:
 1. **Para Criadores:** Permite transformar negócios, propriedades, e ativos físicos em tokens SPL rastreáveis de forma simples e desburocratizada, usando a Solana para transações e o Arweave (via Irys) para persistência permanente de documentos.
 2. **Para Investidores:** Oferece um marketplace para aquisição fracionada de ativos validados, com simulações de retorno, dividendos e acompanhamento seguro.
 
@@ -32,4 +32,4 @@ O que construímos não é apenas uma UI bonitinha; é um **motor econômico com
 - O mapeamento preciso dos limites (inventário bloqueando inputs de mais tokens) impede cenários caóticos de overbooking no front-end.
 - A clareza dos custos e valuations reais nas interfaces eleva a credibilidade institucional perante o investidor final.
 
-Em essência, a Lake Tokeniza atua como uma **Bolsa de Valores Descentralizada** para PMEs e Empreendimentos, onde o risco de plataforma é minimizado pela clareza dos dados e o registro perpétuo no Arweave.
+Em essência, a Lake atua como uma **Bolsa de Valores Descentralizada** para PMEs e Empreendimentos, onde o risco de plataforma é minimizado pela clareza dos dados e o registro perpétuo no Arweave.

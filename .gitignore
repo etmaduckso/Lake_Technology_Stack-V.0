@@ -46,3 +46,17 @@ next-env.d.ts
 
 # solana local validator
 test-ledger/
+
+# arquivos de referencia (pptx / apresentacoes) - nao versionar
+*.pptx
+*.ppt
+Lake_Presentation_Base.pptx
+Lake_Presentation_Design.pptx
+
+# agent governance rules — versionado intencionalmente (.agents/rules/)
+# tooling local de IDE permanece ignorado
+.claude/
+
+# env vars
+.env
+prisma/.env

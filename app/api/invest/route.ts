@@ -36,8 +36,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Ativo não encontrado." }, { status: 404 });
     }
 
-    if (asset.tokensAvailable < quantity) {
-      return NextResponse.json({ error: "Inventário insuficiente para esta quantidade." }, { status: 400 });
+    if (asset.tokensAvailable <= 0 || quantity > asset.tokensAvailable) {
+      return NextResponse.json({ error: "Oferta esgotada ou saldo insuficiente." }, { status: 400 });
     }
 
     const currentBalance = user.credits ?? user.user_credits?.balance ?? 0;

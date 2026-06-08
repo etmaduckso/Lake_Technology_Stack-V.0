@@ -11,6 +11,7 @@ import React, {
 import { useWallet as useSolanaWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useRouter } from "next/navigation";
+import { useNetworkHub } from "@/context/NetworkContext";
 
 interface WalletContextType {
   walletAddress: string | null;
@@ -50,9 +51,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [wallet, connected, connecting, connect]);
 
+  const { setTier, setSbtIdentity } = useNetworkHub();
+
   useEffect(() => {
-    // Quando conecta a carteira Solana, validamos no banco
-    const validateUser = async () => {
+    // Quando conecta a carteira Solana, validamos no banco e hidratamos o perfil
+    const validateAndHydrateUser = async () => {
       if (connected && walletAddress) {
         try {
           console.log("🔍 Validando usuário no banco de dados Solana...");
@@ -72,24 +75,61 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
           console.log("✅ Usuário validado no banco de dados:", data.user);
           setValidationError(null);
+
+          // Hidratação passiva de perfil a partir do banco e do Arweave
+          console.log("🔍 Carregando perfil do usuário...");
+          const profileRes = await fetch(`/api/users/profile?wallet=${walletAddress}`);
+          if (profileRes.ok) {
+            const profileData = await profileRes.json();
+            if (profileData.success) {
+              // Seta o tier com base no status de cidadão do banco de dados
+              if (profileData.isCitizen) {
+                setTier("CITIZEN");
+              } else {
+                setTier("VISITOR");
+              }
+
+              // Se houver a URI/HASH do JSON no Arweave, buscamos as informações
+              if (profileData.sbtImageUrl) {
+                try {
+                  console.log(`🌐 Buscando metadados do Arweave: ${profileData.sbtImageUrl}`);
+                  const arweaveRes = await fetch(profileData.sbtImageUrl);
+                  if (arweaveRes.ok) {
+                    const arweaveData = await arweaveRes.json();
+                    if (arweaveData.nickname) {
+                      setSbtIdentity(arweaveData.nickname, arweaveData.avatarUrl || "");
+                    }
+                  }
+                } catch (arweaveErr) {
+                  console.error("❌ Erro ao buscar dados do Arweave:", arweaveErr);
+                }
+              } else {
+                setSbtIdentity("", "");
+              }
+            }
+          }
         } catch (dbError) {
-          console.error("❌ Erro ao validar usuário no banco:", dbError);
+          console.error("❌ Erro ao validar/hidratar usuário no banco:", dbError);
           setValidationError(
             "Carteira conectada. Não foi possível sincronizar seu perfil agora."
           );
         }
       } else {
         setValidationError(null);
+        // Limpa a identidade da sessão ao desconectar
+        setSbtIdentity("", "");
+        setTier("VISITOR");
       }
     };
 
-    validateUser();
-  }, [connected, walletAddress, disconnect]);
+    validateAndHydrateUser();
+  }, [connected, walletAddress, setTier, setSbtIdentity]);
 
-  // Força re-render do Next.js App Router em transições de estado para a UI reagir instantaneamente
-  useEffect(() => {
-    router.refresh();
-  }, [connected, walletAddress, router]);
+  // NOTA: router.refresh() foi removido intencionalmente.
+  // O React Context já propaga mudanças de 'connected'/'walletAddress'
+  // reativamente para todos os consumidores sem necessidade de revalidar
+  // o cache do servidor. O refresh() causava desmount/remount da árvore
+  // de componentes, quebrando a reatividade dos Client Components.
 
   const connectWallet = useCallback(() => {
     setValidationError(null);

@@ -71,7 +71,7 @@ export async function uploadFileToIrys(
   // Tags obrigatórias para que o browser renderize inline (não faça download)
   const tags = [
     { name: "Content-Type", value: mimeType },
-    { name: "App-Name", value: "LakeTokeniza" },
+    { name: "App-Name", value: "Lake" },
   ];
 
   console.log(`[Irys] Iniciando upload: ${fileBuffer.length} bytes | tipo: ${mimeType}`);

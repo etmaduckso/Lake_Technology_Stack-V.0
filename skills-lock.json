@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "colosseum-fit": {
+      "source": "AiltonSavio/colosseum-fit",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "630504947d61e4abc0fa3a8398170d84a87ce2fd35e68a15b9fcaf47c147a4bb"
+    }
+  }
+}

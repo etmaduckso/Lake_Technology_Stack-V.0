@@ -7,8 +7,31 @@ import { isValidSolanaAddress } from "@/lib/solana-address";
 const FAUCET_COOLDOWN_MS = 5 * 60 * 1000;
 const rateLimitMap = new Map<string, number>();
 
-// Controle de cota de uso máximo por carteira de destino (Limite de 2 resgates)
-const faucetUsageCountMap = new Map<string, number>();
+// Controle de cota de uso máximo por carteira (Limite 1 resgate único).
+// Obs: Map in-memory é reiniciado em restart; o frontend usa a medalha
+// fase-3-faucet como fallback persistente via /api/medals.
+export const faucetUsageCountMap = new Map<string, number>();
+export const FAUCET_MAX_CLAIMS = 1; // tokenomics guard: 1 resgate por carteira
+
+// GET /api/faucet?wallet=... — verifica se a carteira já resgatou
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const wallet = searchParams.get("wallet");
+
+  if (!wallet || !isValidSolanaAddress(wallet)) {
+    return NextResponse.json({ error: "Carteira inválida." }, { status: 400 });
+  }
+
+  const count = faucetUsageCountMap.get(wallet) ?? 0;
+  const alreadyClaimed = count >= FAUCET_MAX_CLAIMS;
+
+  return NextResponse.json({
+    wallet,
+    claimCount: count,
+    alreadyClaimed,
+    remainingClaims: Math.max(0, FAUCET_MAX_CLAIMS - count),
+  });
+}
 
 export async function POST(req: Request) {
   try {
@@ -30,12 +53,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Validação da Cota Máxima de Uso (Máximo 2 vezes)
+    // 2. Validação da Cota Máxima de Uso (Máximo 1 resgate por carteira — Tokenomics Guard)
     const currentUsageCount = faucetUsageCountMap.get(walletAddress) || 0;
-    if (currentUsageCount >= 2) {
+    if (currentUsageCount >= FAUCET_MAX_CLAIMS) {
       return NextResponse.json(
         { 
-          error: "Acesso negado. Esta carteira já atingiu o limite máximo de 2 resgates permitidos no LakeFaucet." 
+          error: "Acesso negado. Esta carteira já resgatou seus 0.05 SOL de teste. Cada carteira tem direito a 1 resgate único.",
+          alreadyClaimed: true,
         },
         { status: 403 }
       );
@@ -107,7 +131,8 @@ export async function POST(req: Request) {
       signature,
       amount: 0.05,
       recipient: walletAddress,
-      remainingClaims: 2 - (currentUsageCount + 1),
+      alreadyClaimed: false,
+      remainingClaims: 0, // após este resgate, zerou
     }, { status: 200 });
 
   } catch (error: any) {

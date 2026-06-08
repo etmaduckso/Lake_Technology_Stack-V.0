@@ -3,17 +3,20 @@
 import { useEffect, useState } from "react";
 import { useWallet } from "@/context/wallet-context";
 import { ShieldCheck, Loader2 } from "lucide-react";
+import { useDict } from "@/lib/i18n/client";
+import { getUserRole } from "@/app/actions/admin.actions";
+import Link from "next/link";
 
 export default function AdminBadge() {
     const { walletAddress } = useWallet();
-    const [isAdmin, setIsAdmin] = useState(false);
+    const dict = useDict();
+    const [role, setRole] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const checkAdminStatus = async () => {
-            // Se não tem carteira, reseta e para.
             if (!walletAddress) {
-                setIsAdmin(false);
+                setRole(null);
                 return;
             }
 
@@ -21,20 +24,17 @@ export default function AdminBadge() {
             setLoading(true);
 
             try {
-                // Força a URL com a carteira atual
-                const response = await fetch(`/api/admin/check?wallet=${walletAddress}`);
-                const data = await response.json();
+                const data = await getUserRole(walletAddress);
+                console.log("🕵️ [CLIENT] Resposta da Server Action:", data);
 
-                console.log("🕵️ [CLIENT] Resposta da API:", data);
-
-                if (data.isAdmin) {
-                    setIsAdmin(true);
+                if (data.success && data.role) {
+                    setRole(data.role);
                 } else {
-                    setIsAdmin(false);
+                    setRole(null);
                 }
             } catch (error) {
                 console.error("🕵️ [CLIENT] Erro ao conectar na API:", error);
-                setIsAdmin(false);
+                setRole(null);
             } finally {
                 setLoading(false);
             }
@@ -43,22 +43,21 @@ export default function AdminBadge() {
         checkAdminStatus();
     }, [walletAddress]);
 
-    // Renderização Condicional
     if (!walletAddress) return null;
-    if (!isAdmin && !loading) return null; // Se não é admin e carregou, esconde.
+    if (!role && !loading) return null;
 
     return (
-        <div className="flex items-center gap-2 px-3 py-1 ml-2 rounded-full bg-slate-900 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+        <Link href="/dashboard/staff" className="flex items-center gap-2 px-3 py-1 ml-2 rounded-full bg-slate-900 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)] hover:bg-slate-800 transition-colors">
             {loading ? (
                 <Loader2 className="w-4 h-4 text-emerald-500 animate-spin" />
             ) : (
                 <>
                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
                     <span className="text-xs font-bold tracking-wider text-emerald-400 uppercase">
-                        Admin
+                        {role === "Master" ? dict.wallet.admin : role}
                     </span>
                 </>
             )}
-        </div>
+        </Link>
     );
 }

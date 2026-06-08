@@ -14,6 +14,8 @@ import {
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 import { getSolPrice } from "@/lib/solana-oracle";
+import { useNetworkHub } from "@/context/NetworkContext";
+import { toast } from "sonner";
 
 // Credit Plans Configuration
 export interface CreditPlan {
@@ -81,8 +83,9 @@ export interface TransactionRecord {
 
 interface CreditsContextType {
   credits: number;
+  faucetCreditsPurchased: number;
   buyCredits: (plan: CreditPlan) => Promise<boolean>;
-  spendCredit: () => Promise<boolean>;
+  spendCredit: (amount?: number, description?: string, txHash?: string, solAmount?: number) => Promise<boolean>;
   isLoading: boolean;
   history: TransactionRecord[];
   openHistory: () => void;
@@ -106,9 +109,11 @@ const CreditsContext = createContext<CreditsContextType | undefined>(undefined);
 export function CreditsProvider({ children }: { children: ReactNode }) {
   const { publicKey, connected, sendTransaction } = useWallet();
   const { connection } = useConnection();
+  const { isMainnet } = useNetworkHub();
   const walletAddress = publicKey?.toBase58();
 
   const [credits, setCredits] = useState(0);
+  const [faucetCreditsPurchased, setFaucetCreditsPurchased] = useState(0);
   const [history, setHistory] = useState<TransactionRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -233,8 +238,16 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
    */
   const buyCredits = async (plan: CreditPlan): Promise<boolean> => {
     if (!publicKey || !walletAddress) {
-      alert("Conecte sua carteira primeiro.");
+      toast.error("Conecte sua carteira primeiro.");
       return false;
+    }
+
+    // Validação de Tokenomics (Limite de Subsídio em Devnet)
+    if (!isMainnet) {
+      if (faucetCreditsPurchased + plan.credits > 300) {
+        toast.error("Limite de laboratório (300 LKZ) atingido...");
+        return false;
+      }
     }
 
     setIsLoading(true);
@@ -307,6 +320,11 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         setCredits(data.credits);
+        
+        // Atualizar acumulador se estiver na Devnet
+        if (!isMainnet) {
+          setFaucetCreditsPurchased(prev => prev + plan.credits);
+        }
 
         const newTx: TransactionRecord = {
           id: Date.now().toString(),
@@ -322,7 +340,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
         setIsModalOpen(false);
 
         console.log(`✅ Compra realizada! Novo saldo: ${data.credits}`);
-        alert(`✅ Compra realizada! Você agora tem ${data.credits} créditos.`);
+        toast.success(`✅ Compra realizada! Você agora tem ${data.credits} créditos.`);
 
         return true;
       } else {
@@ -330,7 +348,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
       }
     } catch (error: any) {
       console.error("Erro na compra de créditos:", error);
-      alert("Compra cancelada ou falhou. Tente novamente.");
+      toast.error("Compra cancelada ou falhou. Tente novamente.");
       return false;
     } finally {
       setIsLoading(false);
@@ -342,14 +360,14 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
    * @param amount Quantidade de créditos a debitar (padrão: 3)
    * @returns true se o crédito foi debitado com sucesso
    */
-  const spendCredit = async (amount: number = 3): Promise<boolean> => {
+  const spendCredit = async (amount: number = 3, description?: string, txHash?: string, solAmount?: number): Promise<boolean> => {
     if (!walletAddress) {
-      alert("Conecte sua carteira primeiro.");
+      toast.error("Conecte sua carteira primeiro.");
       return false;
     }
 
     if (credits < amount) {
-      alert(`Saldo insuficiente. Você precisa de ${amount} créditos.`);
+      toast.error(`Saldo insuficiente. Você precisa de ${amount} créditos.`);
       setIsModalOpen(true); // Open modal to buy credits
       return false;
     }
@@ -365,7 +383,9 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
           walletAddress,
           amount: amount,
           action: "spend",
-          description: "Simulação de Tokenização (Web3)",
+          description: description || "Simulação de Tokenização (Web3)",
+          txHash,
+          solAmount,
         }),
       });
 
@@ -378,15 +398,16 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
           id: Date.now().toString(),
           type: "USO",
           amount: `-${amount} Créditos`,
-          hash: "LZ-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
+          hash: txHash || "LZ-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
           date: new Date().toLocaleString("pt-BR"),
+          solAmount,
         };
 
         saveHistoryToLocal([newTx, ...history]);
         console.log(`✅ Crédito gasto. Saldo: ${data.credits}`);
         return true;
       } else {
-        alert(data.error || "Erro ao gastar crédito");
+        toast.error(data.error || "Erro ao gastar crédito");
         return false;
       }
     } catch (error) {
@@ -401,6 +422,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
     <CreditsContext.Provider
       value={{
         credits,
+        faucetCreditsPurchased,
         buyCredits,
         spendCredit,
         isLoading,

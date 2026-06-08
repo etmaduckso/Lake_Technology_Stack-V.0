@@ -5,15 +5,27 @@ export interface ExchangeRates {
   solToBrl: number;
 }
 
+let cachedRates: ExchangeRates | null = null;
+let lastFetchTime: number = 0;
+const CACHE_DURATION = 60000; // 60 segundos
+
 export function useExchangeRates() {
-  const [rates, setRates] = useState<ExchangeRates | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [rates, setRates] = useState<ExchangeRates | null>(cachedRates);
+  const [isLoading, setIsLoading] = useState<boolean>(!cachedRates);
   const [isError, setIsError] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
 
     async function fetchRates() {
+      if (cachedRates && Date.now() - lastFetchTime < CACHE_DURATION) {
+        if (isMounted) {
+          setRates(cachedRates);
+          setIsLoading(false);
+        }
+        return;
+      }
+
       try {
         setIsLoading(true);
         setIsError(false);
@@ -46,10 +58,9 @@ export function useExchangeRates() {
         const solToBrl = solToUsd * usdToBrl;
 
         if (isMounted) {
-          setRates({
-            usdToBrl,
-            solToBrl,
-          });
+          cachedRates = { usdToBrl, solToBrl };
+          lastFetchTime = Date.now();
+          setRates(cachedRates);
           setIsLoading(false);
         }
       } catch (error) {

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Lake × Colosseum Frontier — Análise de Fit</title>
+<link rel="icon" href="public/brand/lake-logo-light.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --paper: #FFFFFF;
+    --ink: #0A0A0A;
+    --muted: #4A4A4A;
+    --soft: #767676;
+    --line: #E8E8E8;
+
+    --cyan: #29ABE2;
+    --cyan-dark: #1B95C8;
+    --cyan-light: #7BC8EE;
+    --cyan-soft: #E5F5FC;
+    --wave-green: #9BC9C0;
+
+    --coral: #EA6262;
+    --turquoise: #94D8D3;
+    --lilac: #BF80C3;
+    --lime: #E6F097;
+    --mint: #9BDFA0;
+
+    --serif: "EB Garamond", "Iowan Old Style", Georgia, serif;
+    --display: "Nunito", -apple-system, "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    font-family: var(--display);
+    background: var(--ink);
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .deck { position: relative; height: 100vh; width: 100vw; }
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 64px 88px 80px;
+    background: var(--bg);
+    overflow-y: auto;
+  }
+  .slide.active { display: flex; }
+  .slide h1 { font-size: 56px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
+  .slide h2 { font-size: 40px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.05; margin-bottom: 10px; }
+  .slide h3 { font-size: 24px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .slide p, .slide li { font-family: var(--serif); font-size: 19px; line-height: 1.55; color: var(--muted); }
+  .slide p.sans, .slide li.sans { font-family: var(--display); }
+  .slide strong { color: var(--ink); font-weight: 700; font-family: var(--display); }
+  .slide a { color: var(--cyan-dark); text-decoration: none; font-weight: 700; }
+  .slide em, .slide i { font-family: var(--serif); font-style: italic; }
+
+  /* ───────── BRAND HEADER ───────── */
+  .brand-header {
+    position: absolute; top: 28px; left: 88px;
+    display: flex; align-items: center; gap: 12px;
+    z-index: 5;
+  }
+  .brand-mark {
+    height: 32px; width: auto;
+  }
+  .brand-tagline {
+    font-family: var(--serif); font-style: italic;
+    font-size: 13px; color: var(--soft);
+    border-left: 1px solid var(--line);
+    padding-left: 12px;
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--display);
+    font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--cyan-dark);
+    background: var(--cyan-soft);
+    padding: 7px 14px; border-radius: 999px;
+    border: 1px solid rgba(123, 200, 238, 0.4);
+    margin-bottom: 24px; align-self: flex-start;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--cyan);
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
+
+  /* ───────── NAV ───────── */
+  .nav {
+    position: fixed; bottom: 20px; right: 28px;
+    display: flex; gap: 10px; align-items: center;
+    background: var(--ink); color: #fff;
+    padding: 10px 18px; border-radius: 999px;
+    font-family: var(--display);
+    font-size: 13px; font-weight: 700;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+    z-index: 50;
+  }
+  .nav button {
+    background: transparent; border: 0; color: #fff;
+    font-size: 16px; cursor: pointer; padding: 0 8px;
+  }
+  .nav button:disabled { opacity: 0.3; cursor: default; }
+
+  .hint {
+    position: fixed; bottom: 22px; left: 28px;
+    font-family: var(--display);
+    color: #fff; font-size: 12px; font-weight: 600; z-index: 50;
+    background: rgba(10, 10, 10, 0.85);
+    padding: 8px 14px; border-radius: 999px;
+  }
+
+  /* ───────── COVER ───────── */
+  .cover {
+    background: #fff;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-wave {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 280px;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--cyan-dark) 100%);
+    clip-path: ellipse(140% 100% at 50% 0%);
+    z-index: 0;
+  }
+  .cover-wave::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--wave-green);
+    clip-path: ellipse(80% 60% at 85% 20%);
+    opacity: 0.55;
+  }
+  .cover-logo {
+    position: absolute; top: 64px; left: 50%; transform: translateX(-50%);
+    height: 88px; width: auto;
+    z-index: 2;
+  }
+  .cover-content {
+    position: relative; z-index: 3;
+    margin-top: 220px;
+  }
+  .cover .eyebrow {
+    background: rgba(255,255,255,0.92);
+    color: var(--cyan-dark);
+    border-color: rgba(255,255,255,0.5);
+    backdrop-filter: blur(8px);
+  }
+  .cover h1 { color: var(--ink); font-size: 72px; }
+  .cover h1 .accent { color: var(--cyan); }
+  .cover p.lead {
+    font-family: var(--serif); font-style: italic;
+    color: var(--muted); font-size: 22px;
+    margin-top: 24px; max-width: 760px;
+  }
+  .cover .meta {
+    margin-top: 60px; display: flex; gap: 56px;
+    font-family: var(--display);
+    color: var(--soft); font-size: 13px; font-weight: 600;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .cover .meta strong {
+    color: var(--ink); display: block; font-size: 28px;
+    font-weight: 900; margin-bottom: 4px; letter-spacing: -0.02em;
+    text-transform: none;
+  }
+
+  /* ───────── SUMMARY ───────── */
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 28px;
+  }
+  .stat {
+    border: 1px solid var(--line); background: var(--paper);
+    border-radius: 20px; padding: 28px;
+    position: relative; overflow: hidden;
+  }
+  .stat::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: var(--cyan);
+  }
+  .stat.applies::before { background: var(--mint); }
+  .stat.applies .num { color: #2D8F3F; }
+  .stat.extend::before { background: var(--lime); }
+  .stat.extend .num { color: #A8821C; }
+  .stat.skip::before { background: var(--coral); }
+  .stat.skip .num { color: var(--coral); }
+  .stat .num { font-family: var(--display); font-size: 56px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+  .stat .label { font-family: var(--serif); font-size: 15px; color: var(--muted); margin-top: 10px; line-height: 1.4; }
+
+  .takeaways { margin-top: 36px; }
+  .takeaways li {
+    list-style: none; padding-left: 32px; position: relative;
+    margin-bottom: 14px; font-family: var(--serif); font-size: 18px;
+  }
+  .takeaways li::before {
+    content: "›"; position: absolute; left: 0; top: -2px;
+    color: var(--cyan); font-family: var(--display); font-weight: 900;
+    font-size: 24px;
+  }
+
+  /* ───────── TRACK CARDS ───────── */
+  .track {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .track.applies { border-left: 6px solid var(--mint); }
+  .track.extend { border-left: 6px solid var(--lime); }
+  .track-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 24px; margin-bottom: 14px;
+  }
+  .track-title { font-family: var(--display); font-size: 24px; font-weight: 900; color: var(--ink); letter-spacing: -0.015em; }
+  .track-sponsor { font-family: var(--serif); font-style: italic; color: var(--soft); font-size: 16px; }
+  .reward {
+    font-family: var(--display);
+    font-size: 32px; font-weight: 900; color: #2D8F3F;
+    white-space: nowrap; letter-spacing: -0.02em;
+  }
+  .extend .reward { color: #A8821C; }
+  .track .row { display: grid; grid-template-columns: 130px 1fr; gap: 14px; margin-top: 10px; align-items: start; }
+  .track .row .k {
+    font-family: var(--display);
+    font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--soft); padding-top: 5px;
+  }
+  .track .row .v { font-family: var(--serif); font-size: 16px; color: var(--ink); line-height: 1.55; }
+  .track .row .v code {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 13px; background: var(--cyan-soft); padding: 2px 7px; border-radius: 5px;
+    color: var(--cyan-dark);
+  }
+  .effort {
+    display: inline-block; font-family: var(--display);
+    font-size: 12px; font-weight: 800;
+    background: var(--lime); color: #6B4F0A;
+    padding: 4px 12px; border-radius: 6px; margin-left: 6px;
+    letter-spacing: 0.02em;
+  }
+  .meta-line {
+    margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--display);
+    font-size: 13px; color: var(--soft); font-weight: 600;
+  }
+
+  /* ───────── SECTION HEADER ───────── */
+  .section-head {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 2px solid var(--line); padding-bottom: 14px;
+    margin-bottom: 26px;
+  }
+  .section-head .badge {
+    font-family: var(--display);
+    background: var(--mint); color: #1F5A2A;
+    padding: 7px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 900; letter-spacing: 0.06em;
+  }
+  .section-head.amber .badge { background: var(--lime); color: #6B4F0A; }
+  .section-head .count {
+    font-family: var(--serif); font-style: italic;
+    font-size: 15px; color: var(--soft); margin-left: auto;
+  }
+
+  /* ───────── PRIORITIZATION ───────── */
+  .prio-table {
+    width: 100%; border-collapse: collapse;
+    background: var(--paper); border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--line); margin-top: 22px;
+  }
+  .prio-table th, .prio-table td {
+    padding: 16px 20px; text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .prio-table th {
+    background: var(--cyan-soft);
+    font-family: var(--display);
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--cyan-dark);
+  }
+  .prio-table td { font-family: var(--serif); font-size: 16px; color: var(--ink); }
+  .prio-table td.sans { font-family: var(--display); }
+  .prio-table tr:last-child td { border-bottom: 0; }
+  .prio-table .reward-cell { font-family: var(--display); font-weight: 800; color: #2D8F3F; white-space: nowrap; }
+  .prio-table .rank {
+    display: inline-block; width: 32px; height: 32px;
+    border-radius: 50%; background: var(--cyan); color: #fff;
+    text-align: center; line-height: 32px; font-weight: 900;
+    font-family: var(--display); font-size: 14px;
+  }
+
+  /* ───────── WARNINGS ───────── */
+  .warn-box {
+    background: var(--paper); border: 1px solid var(--line);
+    border-left: 6px solid var(--coral);
+    border-radius: 16px; padding: 24px 28px; margin-bottom: 16px;
+  }
+  .warn-box h3 { color: var(--coral); }
+  .warn-box.amber { border-left-color: var(--lime); }
+  .warn-box.amber h3 { color: #A8821C; }
+  .warn-box.cyan { border-left-color: var(--cyan); }
+  .warn-box.cyan h3 { color: var(--cyan-dark); }
+  .warn-box ul { margin-top: 10px; padding-left: 22px; }
+  .warn-box li { font-family: var(--serif); font-size: 16px; line-height: 1.55; color: var(--ink); margin-bottom: 8px; }
+
+  /* ───────── PAGE NUM ───────── */
+  .page-num {
+    position: absolute; top: 32px; right: 88px;
+    font-family: var(--display);
+    font-size: 11px; color: var(--soft); font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  /* ───────── CALLOUT ───────── */
+  .callout {
+    margin-top: 28px; padding: 22px 26px;
+    background: var(--lime); border-radius: 14px;
+    font-family: var(--serif); font-size: 16px; color: #6B4F0A;
+    line-height: 1.55;
+  }
+  .callout strong { color: #4A3608; }
+
+  @media print {
+    body, html { overflow: visible; background: white; height: auto; }
+    .deck { height: auto; }
+    .slide { display: flex !important; position: relative; page-break-after: always; height: 100vh; }
+    .nav, .hint { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+<!-- ═══════════════════════ SLIDE 1: COVER ═══════════════════════ -->
+<section class="slide cover active">
+  <div class="cover-wave"></div>
+  <img src="public/brand/lake-logo-variants.png" alt="Lake" class="cover-logo" onerror="this.style.display='none'">
+
+  <div class="cover-content">
+    <span class="eyebrow"><span class="dot"></span> Análise estratégica · 2026-05-11</span>
+    <h1>Lake × <span class="accent">Colosseum Frontier</span></h1>
+    <p class="lead">Mapeamento honesto dos side tracks globais aos quais a Lake pode se candidatar — já no estado atual ou com extensões razoáveis em ~24h.</p>
+    <div class="meta">
+      <div><strong>21</strong>tracks globais</div>
+      <div><strong>$167.4K</strong>em prêmios</div>
+      <div><strong>2026-05-12</strong>deadline</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SLIDE 2: SUMMARY ═══════════════════════ -->
+<section class="slide">
+  <div class="brand-header">
+    <img src="public/brand/lake-logo-light.png" alt="Lake" class="brand-mark" onerror="this.style.display='none'">
+    <span class="brand-tagline">Opening digital horizons</span>
+  </div>
+  <span class="page-num">02 / 09</span>
+
+  <div style="margin-top: 56px;">
+    <span class="eyebrow">TL;DR</span>
+    <h2>Resumo executivo</h2>
+    <p>Triagem dos 21 tracks globais do Frontier contra a stack atual da Lake — Next.js 16, Anchor vault, Irys/Arweave, oráculo dual Jupiter/Pyth e câmbio trilateral BRL/USDC/SOL.</p>
+  </div>
+
+  <div class="summary-grid">
+    <div class="stat applies">
+      <div class="num">3</div>
+      <div class="label">Tracks em que a Lake <strong>já se encaixa</strong> sem mudanças de produto</div>
+    </div>
+    <div class="stat extend">
+      <div class="num">4</div>
+      <div class="label">Tracks com <strong>fit alcançável em ~24h</strong> via extensão alinhada</div>
+    </div>
+    <div class="stat skip">
+      <div class="num">14</div>
+      <div class="label">Tracks descartados por <strong>incompatibilidade de domínio</strong></div>
+    </div>
+  </div>
+
+  <ul class="takeaways">
+    <li><strong>$50K Adevar (audit credits)</strong> é o maior alvo direto — RWA está explicitamente no escopo.</li>
+    <li><strong>$10K theMiracle</strong> é pitch de marketing puro, mas pede compromisso de $5K em valor distribuído ao usuário.</li>
+    <li><strong>34 tracks regionais</strong> foram excluídos — incluindo o <strong>Brasil</strong>, provavelmente o mais relevante dada a base institucional brasileira.</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════ SLIDE 3: APPLIES ═══════════════════════ -->
+<section class="slide">
+  <div class="brand-header">
+    <img src="public/brand/lake-logo-light.png" alt="Lake" class="brand-mark" onerror="this.style.display='none'">
+    <span class="brand-tagline">Opening digital horizons</span>
+  </div>
+  <span class="page-num">03 / 09</span>
+
+  <div style="margin-top: 56px;" class="section-head">
+    <span class="badge">JÁ É UM FIT</span>
+    <h2 style="margin-bottom: 0;">Submeter como está</h2>
+    <span class="count">3 tracks · $70K em jogo</span>
+  </div>
+
+  <div class="track applies">
+    <div class="track-head">
+      <div>
+        <div class="track-title">Security Audit Credits</div>
+        <div class="track-sponsor">Adevar Labs</div>
+      </div>
+      <div class="reward">$50,000</div>
+    </div>
+    <div class="row">
+      <div class="k">Por que encaixa</div>
+      <div class="v">Escopo lista <strong>"DeFi, RWAs, Consumer Apps, Stablecoins"</strong> explicitamente. Lake é RWA puro com smart contract Anchor (<code>anchor/programs/vault</code>) e relayer de tesouraria descrito no README.</div>
+    </div>
+    <div class="row">
+      <div class="k">Watch out</div>
+      <div class="v">Exige pitch deck, funding stage e <strong>Security Statement</strong>. Revisão é rolling pós-hackathon. Prioridade para Demo Days regionais (Brasil conta).</div>
+    </div>
+    <div class="meta-line">
+      <span>Deadline: <strong>2026-05-12</strong></span>
+      <a href="https://superteam.fun/earn/listing/50k-adevarlabs-bounty" target="_blank">Abrir listagem ›</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SLIDE 4: APPLIES CONT ═══════════════════════ -->
+<section class="slide">
+  <div class="brand-header">
+    <img src="public/brand/lake-logo-light.png" alt="Lake" class="brand-mark" onerror="this.style.display='none'">
+    <span class="brand-tagline">Opening digital horizons</span>
+  </div>
+  <span class="page-num">04 / 09</span>
+
+  <div style="margin-top: 56px;" class="section-head">
+    <span class="badge">JÁ É UM FIT</span>
+    <h2 style="margin-bottom: 0;">Submeter como está · cont.</h2>
+  </div>
+
+  <div class="track applies">
+    <div class="track-head">
+      <div>
+        <div class="track-title">RPC Infrastructure Credits</div>
+        <div class="track-sponsor">RPC Fast</div>
+      </div>
+      <div class="reward">$10,000</div>
+    </div>
+    <div class="row">
+      <div class="k">Por que encaixa</div>
+      <div class="v">Track aceita qualquer projeto Frontier — usar RPC Fast não é obrigatório (só dá Bonus Award). Lake já tem <code>NEXT_PUBLIC_SOLANA_RPC_URL</code> configurável: trocar o endpoint habilita o Bonus.</div>
+    </div>
+    <div class="row">
+      <div class="k">Watch out</div>
+      <div class="v">Reward é em créditos de assinatura RPC (até 3 meses), não USDC. Precisa seguir @rpcfast e entrar no TG.</div>
+    </div>
+    <div class="meta-line">
+      <span>Deadline: <strong>2026-05-12</strong></span>
+      <a href="https://superteam.fun/earn/listing/dollar10000-in-rpc-infrastructure-credits-for-colosseum-frontier-hackathon" target="_blank">Abrir listagem ›</a>
+    </div>
+  </div>
+
+  <div class="track applies">
+    <div class="track-head">
+      <div>
+        <div class="track-title">100xDevs Frontier Track</div>
+        <div class="track-sponsor">100xDevs</div>
+      </div>
+      <div class="reward">$10,000</div>
+    </div>
+    <div class="row">
+      <div class="k">Por que encaixa</div>
+      <div class="v">Track aberto, sem categoria. Critérios: execução técnica, problema real, UX, completude. Lake atende todos. <strong>10 prêmios distribuídos</strong> ($500–$2,500) → funil largo.</div>
+    </div>
+    <div class="row">
+      <div class="k">Watch out</div>
+      <div class="v">Precisa submeter no portal Colosseum <strong>E</strong> no Superteam Earn.</div>
+    </div>
+    <div class="meta-line">
+      <span>Deadline: <strong>2026-05-12</strong></span>
+      <a href="https://superteam.fun/earn/listing/100xdevs-frontier-hackathon-track" target="_blank">Abrir listagem ›</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SLIDE 5: EXTENDABLE HEADER ═══════════════════════ -->
+<section class="slide">
+  <div class="brand-header">
+    <img src="public/brand/lake-logo-light.png" alt="Lake" class="brand-mark" onerror="this.style.display='none'">
+    <span class="brand-tagline">Opening digital horizons</span>
+  </div>
+  <span class="page-num">05 / 09</span>
+
+  <div style="margin-top: 56px;" class="section-head amber">
+    <span class="badge">FIT COM TRABALHO RAZOÁVEL</span>
+    <h2 style="margin-bottom: 0;">Extensões alinhadas</h2>
+    <span class="count">4 tracks · $24K em jogo</span>
+  </div>
+
+  <div class="track extend">
+    <div class="track-head">
+      <div>
+        <div class="track-title">Build the Best Benefit</div>
+        <div class="track-sponsor">theMiracle</div>
+      </div>
+      <div class="reward">$10,000</div>
+    </div>
+    <div class="row">
+      <div class="k">Pode encaixar</div>
+      <div class="v">Submissão é uma <strong>proposta de marketing</strong>, não código: framework "Audience / Action / Incentive / Value" para um benefit dentro de Solflare/MetaMask.</div>
+    </div>
+    <div class="row">
+      <div class="k">O que adicionar</div>
+      <div class="v">
+        (1) Escrever proposta em 4 partes — alvo: wallets DeFi-ativas BR/LATAM.<br>
+        (2) Comprometer <strong>≥$5K em valor distribuído</strong> (créditos Lake, tokens, acesso premium).<br>
+        (3) Pitch deck + contexto de growth.
+        <span class="effort">~4–6h</span>
+      </div>
+    </div>
+    <div class="meta-line">
+      <span>Deadline: <strong>2026-05-12</strong></span>
+      <a href="https://superteam.fun/earn/listing/build-the-best-benefit-win-a-wallet-placement" target="_blank">Abrir listagem ›</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SLIDE 6: EXTENDABLE CONT ═══════════════════════ -->
+<section class="slide">
+  <div class="brand-header">
+    <img src="public/brand/lake-logo-light.png" alt="Lake" class="brand-mark" onerror="this.style.display='none'">
+    <span class="brand-tagline">Opening digital horizons</span>
+  </div>
+  <span class="page-num">06 / 09</span>
+
+  <div style="margin-top: 56px;" class="section-head amber">
+    <span class="badge">FIT COM TRABALHO RAZOÁVEL</span>
+    <h2 style="margin-bottom: 0;">Extensões alinhadas · cont.</h2>
+  </div>
+
+  <div class="track extend">
+    <div class="track-head">
+      <div>
+        <div class="track-title">Dune SIM Data Sidetrack</div>
+        <div class="track-sponsor">Dune Analytics</div>
+      </div>
+      <div class="reward">$6,000</div>
+    </div>
+    <div class="row">
+      <div class="k">Pode encaixar</div>
+      <div class="v">Critério é "ter uma feature usando SIM endpoints". Lake já tem <code>app/history/page.tsx</code> — terreno natural para plotar atividade on-chain via SIM (balances + tx history).</div>
+    </div>
+    <div class="row">
+      <div class="k">O que adicionar</div>
+      <div class="v">
+        (1) <code>/api/users/portfolio</code> server-side consumindo SIM.<br>
+        (2) Widget na página history com atividade Solana real.
+        <span class="effort">~1 dia</span>
+      </div>
+    </div>
+    <div class="meta-line">
+      <span>Deadline: <strong>2026-05-12</strong></span>
+      <a href="https://superteam.fun/earn/listing/dune-analytics-x-superteam-earn-or-frontier-data-sidetrack" target="_blank">Abrir listagem ›</a>
+    </div>
+  </div>
+
+  <div class="track extend">
+    <div class="track-head">
+      <div>
+        <div class="track-title">SNS Identity Track</div>
+        <div class="track-sponsor">SNS / MagicBlock</div>
+      </div>
+      <div class="reward">$5,000</div>
+    </div>
+    <div class="row">
+      <div class="k">Pode encaixar</div>
+      <div class="v">Pede identidade social/agent com <code>.sol</code>. Lake já modela <code>KycRecord</code> e identifica criadores por wallet — usar <code>.sol</code> como <strong>camada de confiança do emissor de RWA</strong> é coerente com o pitch institucional.</div>
+    </div>
+    <div class="row">
+      <div class="k">O que adicionar</div>
+      <div class="v">
+        (1) Lookup <code>.sol</code> no <code>wallet-connect</code> ao conectar.<br>
+        (2) Exibir <code>.sol</code> em <code>manage/[id]</code> e cards do marketplace.<br>
+        (3) Badge "verified <code>.sol</code> issuer" em assets aprovados.
+        <span class="effort">~½ – 1 dia</span>
+      </div>
+    </div>
+    <div class="meta-line">
+      <span>Deadline: <strong>2026-05-12</strong></span>
+      <a href="https://superteam.fun/earn/listing/sns-identity-track-colosseum-hackathon-powered-by-sns-stmy-magicblock" target="_blank">Abrir listagem ›</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SLIDE 7: EXTENDABLE CONT ═══════════════════════ -->
+<section class="slide">
+  <div class="brand-header">
+    <img src="public/brand/lake-logo-light.png" alt="Lake" class="brand-mark" onerror="this.style.display='none'">
+    <span class="brand-tagline">Opening digital horizons</span>
+  </div>
+  <span class="page-num">07 / 09</span>
+
+  <div style="margin-top: 56px;" class="section-head amber">
+    <span class="badge">FIT COM TRABALHO RAZOÁVEL</span>
+    <h2 style="margin-bottom: 0;">Extensões alinhadas · cont.</h2>
+  </div>
+
+  <div class="track extend">
+    <div class="track-head">
+      <div>
+        <div class="track-title">Not Your Regular Bounty</div>
+        <div class="track-sponsor">Jupiter</div>
+      </div>
+      <div class="reward">$3,000</div>
+    </div>
+    <div class="row">
+      <div class="k">Pode encaixar</div>
+      <div class="v">Lake <strong>já consome Jupiter v3</strong> para preço SOL/USD em <code>lib/solana-oracle.ts</code>. O bounty pede explicitamente "integre as APIs e nos diga honestamente o que foi ruim". O <strong>DX Report vale 35%</strong> do julgamento.</div>
+    </div>
+    <div class="row">
+      <div class="k">O que adicionar</div>
+      <div class="v">
+        (1) Usar Swap V2 (<code>/order</code> + <code>/execute</code>) numa rota real — ex.: payout SOL→USDC de royalties ou compra de créditos.<br>
+        (2) Escrever <code>DX-REPORT.md</code> detalhado citando experiência do oracle, latência e gaps de docs.
+        <span class="effort">~1 dia + 2–3h report</span>
+      </div>
+    </div>
+    <div class="meta-line">
+      <span>Deadline: <strong>2026-05-12</strong></span>
+      <a href="https://superteam.fun/earn/listing/not-your-regular-bounty" target="_blank">Abrir listagem ›</a>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Nota honesta:</strong> com deadline em ~24h, focar em 2–3 submissões bem-feitas vence dispersão. As extensões acima são compatíveis entre si — SNS + Jupiter podem ser shipados juntos sem conflito de escopo.
+  </div>
+</section>
+
+<!-- ═══════════════════════ SLIDE 8: PRIORIZATION ═══════════════════════ -->
+<section class="slide">
+  <div class="brand-header">
+    <img src="public/brand/lake-logo-light.png" alt="Lake" class="brand-mark" onerror="this.style.display='none'">
+    <span class="brand-tagline">Opening digital horizons</span>
+  </div>
+  <span class="page-num">08 / 09</span>
+
+  <div style="margin-top: 56px;">
+    <span class="eyebrow">Plano sugerido</span>
+    <h2>Ordem de execução em 24h</h2>
+    <p>Sequenciado por <strong>maior retorno esperado por hora investida</strong>, com paralelização onde possível.</p>
+  </div>
+
+  <table class="prio-table">
+    <thead>
+      <tr><th style="width:70px;">#</th><th>Track</th><th>Esforço</th><th>Reward</th><th>Tipo</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="rank">1</span></td>
+        <td><strong>Adevar Labs</strong> — preparar pitch deck + Security Statement</td>
+        <td class="sans">~3h</td>
+        <td class="reward-cell">$50,000</td>
+        <td>Submissão direta</td>
+      </tr>
+      <tr>
+        <td><span class="rank">2</span></td>
+        <td><strong>100xDevs + RPC Fast</strong> — submissão duplicada (mesmo material)</td>
+        <td class="sans">~1h</td>
+        <td class="reward-cell">$20,000</td>
+        <td>Submissão direta</td>
+      </tr>
+      <tr>
+        <td><span class="rank">3</span></td>
+        <td><strong>SNS Identity</strong> — lookup .sol + badge no marketplace</td>
+        <td class="sans">~6h</td>
+        <td class="reward-cell">$5,000</td>
+        <td>Extensão técnica</td>
+      </tr>
+      <tr>
+        <td><span class="rank">4</span></td>
+        <td><strong>Jupiter</strong> — Swap V2 num fluxo + DX Report</td>
+        <td class="sans">~8h</td>
+        <td class="reward-cell">$3,000</td>
+        <td>Extensão técnica</td>
+      </tr>
+      <tr>
+        <td><span class="rank">5</span></td>
+        <td><strong>theMiracle</strong> — proposta de Benefit (sem código)</td>
+        <td class="sans">~4h</td>
+        <td class="reward-cell">$10,000</td>
+        <td>Pitch + commit $5K</td>
+      </tr>
+      <tr>
+        <td><span class="rank">6</span></td>
+        <td><strong>Dune SIM</strong> — widget de portfolio na history</td>
+        <td class="sans">~6h</td>
+        <td class="reward-cell">$6,000</td>
+        <td>Extensão (opcional)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top: 22px; font-size: 15px;">Linhas <strong>1–2 são obrigatórias</strong> (baixíssimo custo, alto teto). Linhas 3–4 são as melhores apostas técnicas. Linhas 5–6 dependem de banda restante.</p>
+</section>
+
+<!-- ═══════════════════════ SLIDE 9: WARNINGS ═══════════════════════ -->
+<section class="slide">
+  <div class="brand-header">
+    <img src="public/brand/lake-logo-light.png" alt="Lake" class="brand-mark" onerror="this.style.display='none'">
+    <span class="brand-tagline">Opening digital horizons</span>
+  </div>
+  <span class="page-num">09 / 09</span>
+
+  <div style="margin-top: 56px;">
+    <span class="eyebrow">Antes de enviar</span>
+    <h2>Avisos críticos</h2>
+  </div>
+
+  <div class="warn-box cyan" style="margin-top: 24px;">
+    <h3>🇧🇷 Track regional do Brasil foi excluído da análise</h3>
+    <ul>
+      <li><strong>hackathon-superteambrasil</strong> está entre os 34 tracks regionais filtrados — dado o domínio <code>.com.br</code> e a base toda em PT-BR, este é provavelmente o <strong>mais relevante de todos</strong> e deve ser conferido manualmente em superteam.fun antes de qualquer outra submissão.</li>
+    </ul>
+  </div>
+
+  <div class="warn-box amber">
+    <h3>Exclusividade entre sponsors</h3>
+    <ul>
+      <li>Alguns sponsors exigem que o projeto não esteja concorrendo em outro track específico. Leia o final de cada listing — especialmente <strong>theMiracle</strong> menciona splits regionais por país.</li>
+      <li>Adevar prioriza times em Demo Days regionais — se houver um Demo Day Brasil, prioridade real.</li>
+    </ul>
+  </div>
+
+  <div class="warn-box">
+    <h3>Pré-requisito universal</h3>
+    <ul>
+      <li>Todos os tracks listados exigem submissão prévia no <strong>portal Colosseum (arena.colosseum.org)</strong> além do Superteam Earn. Sem isso, nenhuma submissão é elegível.</li>
+      <li>Snapshot de tracks data de <strong>2026-05-10</strong> — reconfirme prêmios e prazos no site oficial antes de enviar.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+
+<div class="hint">← → para navegar · F11 fullscreen · Ctrl+P para PDF</div>
+<div class="nav">
+  <button id="prev" aria-label="Anterior">‹</button>
+  <span id="page-indicator">1 / 9</span>
+  <button id="next" aria-label="Próximo">›</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const indicator = document.getElementById('page-indicator');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  let current = 0;
+
+  function show(i) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides[current].classList.add('active');
+    indicator.textContent = `${current + 1} / ${slides.length}`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === slides.length - 1;
+    window.scrollTo(0, 0);
+  }
+  prevBtn.addEventListener('click', () => show(current - 1));
+  nextBtn.addEventListener('click', () => show(current + 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') show(current + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') show(current - 1);
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(slides.length - 1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>
